@@ -34,7 +34,6 @@ sub new {
   $self->_check_params();
   unless ($self->bypass_checks) {
     $self->_check_arguments();
-    $self->_check_argument_types();
     $self->_check_required_together();
     $self->_check_required_one_of();
     $self->_check_required_if();
