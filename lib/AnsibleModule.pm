@@ -93,20 +93,20 @@ sub _check_arguments {
     if ($spec->{type}) {
       if ($spec->{type} eq 'dict') {
         $self->fail_json(msg => "Could not serialize $arg to dict")
-          unless defined $self->params->{$arg}
-            = $self->_to_dict($self->params->{$arg});
+          unless defined($self->params->{$arg}
+            = $self->_to_dict($self->params->{$arg}));
 
       }
       elsif ($spec->{type} eq 'list') {
         $self->fail_json(msg => "Could not serialize $arg to list")
-          unless defined $self->params->{$arg}
-            = $self->_to_list($self->params->{$arg});
+          unless defined($self->params->{$arg}
+            = $self->_to_list($self->params->{$arg}));
 
       }
       elsif ($spec->{type} eq 'bool') {
         $self->fail_json(msg => "Could not serialize $arg to bool")
-          unless defined $self->params->{$arg}
-            = $self->_to_list($self->params->{$arg});
+          unless defined($self->params->{$arg}
+            = $self->_to_list($self->params->{$arg}));
       }
       else {
         $self->fail_json(msg => "Could not serialize $arg to bool")
@@ -114,101 +114,104 @@ sub _check_arguments {
 
       }
     }
+  }
+}
 
 
-    sub _to_dict {
-      my ($self, $val) = @_;
+sub _to_dict {
+  my ($self, $val) = @_;
 
-      # if it's a ref we only accept hashes.
-      if (ref $val) {
-        return $val if ref $val eq 'HASH';
-        return;
+  # if it's a ref we only accept hashes.
+  if (ref $val) {
+    return $val if ref $val eq 'HASH';
+    return;
 
-        # json literal
-      }
-      elsif ($val =~ /^{/) {
-        my $res = decode_json($val);
-        return $res if defined $res;
-      }
-      elsif ($val =~ /=/) {
-        return {split /\s*=\s*/, split /\s*,\s*/, $arg};
-      }
-      return;
+    # json literal
+  }
+  elsif ($val =~ /^{/) {
+    my $res = decode_json($val);
+    return $res if defined $res;
+  }
+  elsif ($val =~ /=/) {
+    return {split /\s*=\s*/, split /\s*,\s*/, $val};
+  }
+  return;
+}
+
+sub _to_list {
+  my ($self, $val) = @_;
+
+  # if it's a ref we only accept arrays.
+  if (ref $val) {
+    return $val if ref $val eq 'ARRAY';
+    return;
+  }
+
+  # single element or split if comma separated
+  return [split /[\s,]+/, $val];
+
+}
+
+sub _to_bool {
+  my ($self, $val) = @_;
+  return 1 if grep { lc($val) eq lc($_) } qw/yes on true 1/;
+  return 0 if grep { lc($val) eq lc($_) } qw/no off false 1/;
+  return undef;
+}
+
+
+sub _check_required_together {
+  my $self = shift;
+}
+
+sub _check_required_one_of {
+  my $self = shift;
+}
+
+sub _check_required_if {
+  my $self = shift;
+}
+
+sub _check_argument_types {
+  my $self = shift;
+}
+
+sub _log_invocation {
+}
+
+sub _set_cwd {
+}
+
+sub _check_params {
+  my $self = shift;
+  for my $param (keys %{$self->params}) {
+    if ($self->check_invalid_arguments) {
+      $self->fail_json(msg => "unsupported parameter for module: $param")
+        unless $self->legal_inputs->{$param};
+    }
+    my $val = $self->params->{$param};
+    $self->no_log(!!$val) if $param eq '_ansible_no_log';
+    if ($param eq '_ansible_check_mode') {
+      $self->exit_json(
+        skipped => 1,
+        msg     => "remote module does not support check mode"
+      ) unless $self->supports_check_mode;
+      $self->check_mode(1);
     }
 
-    sub _to_list {
-      my ($self, $val) = @_;
+    $self->no_log(!!$val) if $param eq '_ansible_no_log';
+  }
+}
 
-      # if it's a ref we only accept arrays.
-      if (ref $val) {
-        return $val if ref $val eq 'ARRAY';
-        return;
-      }
+sub _count_terms {
+  my ($self, $terms) = @_;
+  my $count;
+  for my $term (@$terms) {
+    $count++ if $self->params->{$terms};
+  }
+}
 
-      # single element or split if comma separated
-      return [split /[\s,]+/, $val];
-
-    }
-
-    sub _to_bool {
-      my ($self, $val) = @_;
-      return 1 if grep { lc($val) eq lc($_) } qw/yes on true 1/;
-      return 0 if grep { lc($val) eq lc($_) } qw/no off false 1/;
-      return undef;
-    }
-
-    sub _check_argument_types {
-      my $self = shift;
-    }
-
-    sub _check_required_together {
-      my $self = shift;
-    }
-
-    sub _check_required_one_of {
-      my $self = shift;
-    }
-
-    sub _check_argument_types {
-      my $self = shift;
-    }
-
-    sub _log_invocation {
-    }
-
-    sub _set_cwd {
-    }
-
-    sub _check_params {
-      my $self = shift;
-      for my $param (keys %{$self->params}) {
-        if ($self->check_invalid_arguments) {
-          $self->fail_json(msg => "unsupported parameter for module: $param")
-            unless $self->legal_inputs->{$param};
-        }
-        my $val = $self->params->{$param};
-        $self->no_log(!!$val) if $param eq '_ansible_no_log';
-        if ($param eq '_ansible_check_mode') {
-          $self->exit_json(
-            skipped => 1,
-            msg     => "remote module does not support check mode"
-          ) unless $self->supports_check_mode;
-          $self->check_mode(1);
-        }
-
-        $self->no_log(!!$val) if $param eq '_ansible_no_log';
-      }
-    }
-
-    sub _count_terms {
-      my ($self, $terms) = @_;
-      my $count;
-      for my $term (@$terms) {
-        $count++ if $self->params->{$terms};
-      }
-    }
-
-    1;
+1;
 
 =head1 NAME
 
