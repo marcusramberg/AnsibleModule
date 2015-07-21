@@ -1,0 +1,8 @@
+#!/usr/bin/env perl 
+
+use lib 'lib';
+use AnsibleModule;
+
+my $module=AnsibleModule->new();
+
+$module->exit_json({changed=>1,msg=>"exit_json"});
