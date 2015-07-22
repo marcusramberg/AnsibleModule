@@ -4,6 +4,7 @@ use Mojo::Base -base;
 use Mojo::JSON qw/decode_json encode_json/;
 use Mojo::Util qw/slurp/;
 use POSIX qw/locale_h/;
+use Carp qw/croak/;
 
 
 has argument_spec           => sub { +{} };
@@ -25,6 +26,7 @@ has params => sub {
 has _legal_inputs => sub {
   {_ansible_check_mode => 1, _ansible_no_log => 1};
 };
+
 has check_mode => sub {0};
 
 sub new {
@@ -45,10 +47,18 @@ sub new {
 
 sub exit_json {
   my ($self, $args) = @_;
+  $args->{changed} //= 0;
+  print encode_json($args);
+  exit 0;
 }
 
 sub fail_json {
   my ($self, $args) = @_;
+  croak "Implementation error --  msg to explain the error is required"
+    unless $args->{msg};
+  $args->{failed} = 1;
+  print encode_json($args);
+  exit 1;
 }
 
 sub _check_argument_spec {
@@ -156,7 +166,7 @@ sub _to_bool {
   my ($self, $val) = @_;
   return 1 if grep { lc($val) eq lc($_) } qw/yes on true 1/;
   return 0 if grep { lc($val) eq lc($_) } qw/no off false 1/;
-  return undef;
+  return;
 }
 
 
@@ -229,7 +239,7 @@ my $pkg_mod=AnsibleModule->new(argument_spec=> {
   supports_check_mode => 1,
   );
 ...
-$pkg_mod->exit_json(changed => True, foo => 'bar');
+$pkg_mod->exit_json(changed => 1, foo => 'bar');
 
 =head1 DESCRIPTION
 
@@ -262,9 +272,12 @@ The argument specification for your module.
 
 =head1 METHODS
 
-=head2 exit_json
+=head2 exit_json $args
 
+Exit with a json msg. changed will default to false.
 
+=head2 fail_json $args
 
+Exit with a failure. msg is required.
 
 =cut

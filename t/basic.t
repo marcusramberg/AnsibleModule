@@ -11,7 +11,7 @@ my $t = Test::AnsibleModule->new;
 
   # exit_json
   can_ok $m, 'exit_json';
-  $t->run_ok('ext/exit_json');
+  $t->run_ok('t/ext/exit_json');
 };
 
 done_testing;
