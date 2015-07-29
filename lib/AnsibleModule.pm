@@ -1,6 +1,7 @@
 package AnsibleModule;
 
 use Mojo::Base -base;
+
 use Mojo::JSON qw/decode_json encode_json/;
 use Mojo::Util qw/slurp/;
 use POSIX qw/locale_h/;
@@ -17,10 +18,29 @@ has required_one_of         => sub { [] };
 has supports_check_mode     => sub {0};
 has required_if             => sub { [] };
 
+
 has params => sub {
   my $self = shift;
-  decode_json($ARGV[0] ? slurp($ARGV[0]) : "{}");
-
+  my $args = join(" ", @ARGV);
+  if ($args =~ s/^\@//) {
+    return decode_json(slurp($args));
+  }
+  elsif ($args =~ /^\{/) {
+    return decode_json($args);
+  }
+  else {
+    my $params = {};
+    for my $arg (@ARGV) {
+      my ($k, $v) = split '=', $arg;
+      $self->fail_json(
+        {msg => 'This module requires key=value style argument: ' . $arg})
+        unless defined $v;
+      $self->fail_json({msg => "Duplicate parameter: $k"})
+        if exists $params->{$k};
+      $params->{$k} = $v;
+    }
+    return $params;
+  }
 };
 
 has _legal_inputs => sub {
@@ -46,16 +66,18 @@ sub new {
 }
 
 sub exit_json {
-  my ($self, $args) = @_;
+  my $self = shift;
+  my $args = ref $_[0] ? $_[0] : {@_};
   $args->{changed} //= 0;
   print encode_json($args);
   exit 0;
 }
 
 sub fail_json {
-  my ($self, $args) = @_;
-  croak "Implementation error --  msg to explain the error is required"
-    unless $args->{msg};
+  my $self = shift;
+  my $args = ref $_[0] ? $_[0] : {@_};
+  croak("Implementation error --  msg to explain the error is required")
+    unless defined($args->{'msg'});
   $args->{failed} = 1;
   print encode_json($args);
   exit 1;
@@ -64,15 +86,15 @@ sub fail_json {
 sub _check_argument_spec {
   my $self = shift;
   for my $arg (keys(%{$self->argument_spec})) {
-    $self->legal_inputs->{$arg}++;
+    $self->_legal_inputs->{$arg}++;
     my $spec = $self->argument_spec->{$arg};
     $self->fail_json(msg =>
         "internal error: required and default are mutually exclusive for $arg")
       if defined $spec->{default} && $spec->{required};
     next unless $spec->{aliases};
-    $self->fail_json(msg => "internal error: aliases must be an arrayref")
+    $self->fail_json({msg => "internal error: aliases must be an arrayref"})
       unless ref $spec->{aliases} && ref $spec->{aliases} ne 'ARRAY';
-    $self->legal_inputs->{$_}++ for @{$spec->{aliases}};
+    $self->_legal_inputs->{$_}++ for @{$spec->{aliases}};
   }
 }
 
@@ -87,7 +109,7 @@ sub _check_arguments {
     my $choices = $spec->{choices} || [];
     $self->fail_json(msg => 'error: choices must be a list of values')
       unless ref $choices eq 'ARRAY';
-    if ($self->params->{$arg}) {
+    if ($self->params->{$arg} && @{$choices}) {
       if (!grep { $self->params->{$arg} eq $_ } $choices) {
         $self->fail_json(msg => "value of $arg must be one of: "
             . join(", ", $choices)
@@ -95,9 +117,6 @@ sub _check_arguments {
             . $self->params->{$arg});
       }
     }
-    $self->fail_json(
-      msg => "missing required arguments: " . join(" ", @missing))
-      if @missing;
 
 # Try to wrangle types. We don't care as much as python does about diff scalars.
     if ($spec->{type}) {
@@ -125,6 +144,8 @@ sub _check_arguments {
       }
     }
   }
+  $self->fail_json(msg => "missing required arguments: " . join(" ", @missing))
+    if @missing;
 }
 
 
@@ -190,6 +211,7 @@ sub _log_invocation {
 }
 
 sub _set_cwd {
+  my $self = shift;
 }
 
 sub _check_params {
@@ -197,7 +219,7 @@ sub _check_params {
   for my $param (keys %{$self->params}) {
     if ($self->check_invalid_arguments) {
       $self->fail_json(msg => "unsupported parameter for module: $param")
-        unless $self->legal_inputs->{$param};
+        unless $self->_legal_inputs->{$param};
     }
     my $val = $self->params->{$param};
     $self->no_log(!!$val) if $param eq '_ansible_no_log';

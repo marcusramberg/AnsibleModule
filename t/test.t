@@ -16,4 +16,10 @@ is_deeply(
   {msg => "fail_json", failed => 1},
   'Response as expected'
 );
+$t->run_ok('t/ext/echo', {hello => 'world'});
+is_deeply(
+  $t->last_response,
+  {changed => 0, msg => "echo", hello => 'world'},
+  'Response as expected'
+);
 done_testing;

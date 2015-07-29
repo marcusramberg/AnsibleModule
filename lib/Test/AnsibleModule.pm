@@ -3,7 +3,6 @@ package Test::AnsibleModule;
 use Mojo::Base -base;
 use Test::More;
 use Mojo::JSON qw/decode_json encode_json/;
-use IPC::Open2;
 use Carp qw/croak/;
 
 has 'last_response';
@@ -23,21 +22,21 @@ sub run_ok {
 
 sub _exec_ok {
   my ($self, $module, $args) = @_;
-  my ($i, $o);
-  my $child_pid = open2($i, $o, $module) // croak "Could not fork: $!";
-  if ($child_pid) {
-    print $o encode_json($args);
-    close $o;
-    my $response = "";
-    while (my $line = <$i>) {
-      $response .= $line;
-    }
-    my $res = decode_json($response);
-    $self->last_response($res);
-    close $i;
-    waitpid($child_pid, 0);
-    return $? >> 8;
+  $args ||= {};
+  my $p;
+  my (@mapped_args) = map { $_ . '=' . $args->{$_} } keys %$args;
+
+  open($p, "-|", join(" ", $module, @mapped_args))
+    // croak "Could not run module: $!";
+  my $response = "";
+
+  while (my $line = <$p>) {
+    $response .= $line;
   }
+  my $res = decode_json($response);
+  $self->last_response($res);
+  close $p;
+  return $? >> 8;
 }
 
 sub _test {
