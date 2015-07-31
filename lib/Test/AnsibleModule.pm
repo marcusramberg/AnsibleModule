@@ -17,14 +17,17 @@ sub fail_ok {
 sub run_ok {
   my $self = shift;
   my $rc   = $self->_exec_ok(@_);
-  $self->_test('ok', !$rc, 'Returned zero return code');
+  $self->_test('ok', !$rc,
+    'Response code is success (' . $self->last_response->{msg} . ')');
 }
 
 sub _exec_ok {
-  my ($self, $module, $args) = @_;
-  $args ||= {};
-  my $p;
+  my $self   = shift;
+  my $module = shift;
+  my $args   = ref $_[0] ? $_[0] : {@_};
   my (@mapped_args) = map { $_ . '=' . $args->{$_} } keys %$args;
+
+  my $p;
 
   open($p, "-|", join(" ", $module, @mapped_args))
     // croak "Could not run module: $!";

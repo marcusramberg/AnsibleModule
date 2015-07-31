@@ -17,6 +17,7 @@ has required_together       => sub { [] };
 has required_one_of         => sub { [] };
 has supports_check_mode     => sub {0};
 has required_if             => sub { [] };
+has aliases                 => sub { {} };
 
 
 has params => sub {
@@ -88,13 +89,27 @@ sub _check_argument_spec {
   for my $arg (keys(%{$self->argument_spec})) {
     $self->_legal_inputs->{$arg}++;
     my $spec = $self->argument_spec->{$arg};
+
+    # Check required
     $self->fail_json(msg =>
         "internal error: required and default are mutually exclusive for $arg")
       if defined $spec->{default} && $spec->{required};
-    next unless $spec->{aliases};
+
+    # Check aliases
+    $spec->{aliases} //= [];
     $self->fail_json({msg => "internal error: aliases must be an arrayref"})
-      unless ref $spec->{aliases} && ref $spec->{aliases} ne 'ARRAY';
-    $self->_legal_inputs->{$_}++ for @{$spec->{aliases}};
+      unless ref $spec->{aliases} && ref $spec->{aliases} eq 'ARRAY';
+
+    # Set up aliases
+    for my $alias (@{$spec->{aliases}}) {
+      $self->_legal_inputs->{$alias}++;
+      $self->aliases->{$alias} = $arg;
+      $self->params->{$arg}    = $self->params->{$alias}
+        if exists $self->params->{$alias};
+    }
+
+    # Fallback to default value
+    $self->params->{$arg} //= $spec->{default} if exists $spec->{default};
   }
 }
 
