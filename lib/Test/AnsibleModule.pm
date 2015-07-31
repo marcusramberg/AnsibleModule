@@ -10,18 +10,18 @@ has 'success';
 
 sub fail_ok {
   my $self = shift;
-  my $rc   = $self->_exec_ok(@_);
+  my $rc   = $self->exec_module(@_);
   $self->_test('ok', $rc, 'Returned non-zero return code');
 }
 
 sub run_ok {
   my $self = shift;
-  my $rc   = $self->_exec_ok(@_);
+  my $rc   = $self->exec_module(@_);
   $self->_test('ok', !$rc,
     'Response code is success (' . $self->last_response->{msg} . ')');
 }
 
-sub _exec_ok {
+sub exec_module {
   my $self   = shift;
   my $module = shift;
   my $args   = ref $_[0] ? $_[0] : {@_};
@@ -74,12 +74,21 @@ The deserialized response from the last module run.
 
 =head1 METHODS
 
-=head2 run_ok
+=head2 run_ok <module> [<args>]
 
 Test that the job runs, and returns a 0 error code (succeeds).
 
-=head failed_ok
+=head fail_ok <module> [<args>]
 
 Test that the jobs runs, and returns a non-zero error code (fails).
+
+=head exec_module <module> [<args>]
+
+Run a module, return it's exit code
+
+=head1 SEE ALSO
+
+L<AnsibleModule>
+
 
 =cut

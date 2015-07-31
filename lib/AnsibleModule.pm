@@ -45,7 +45,7 @@ has params => sub {
 };
 
 has _legal_inputs => sub {
-  {_ansible_check_mode => 1, _ansible_no_log => 1};
+  {CHECKMODE => 1, NO_LOG => 1};
 };
 
 has check_mode => sub {0};
@@ -237,8 +237,8 @@ sub _check_params {
         unless $self->_legal_inputs->{$param};
     }
     my $val = $self->params->{$param};
-    $self->no_log(!!$val) if $param eq '_ansible_no_log';
-    if ($param eq '_ansible_check_mode') {
+    $self->no_log(!!$val) if $param eq 'NO_LOG';
+    if ($param eq 'CHECKMODE') {
       $self->exit_json(
         skipped => 1,
         msg     => "remote module does not support check mode"
