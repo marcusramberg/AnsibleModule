@@ -1,0 +1,63 @@
+#!/usr/bin/env perl
+
+use strict; use warnings;
+
+use Getopt::Long 'GetOptionsFromArray';
+use Pod::Usage 'pod2usage';
+use Data::Dumper;
+
+sub extract_usage {
+  open my $handle, '>', \my $output;
+  pod2usage -exitval => 'noexit', -input => (caller)[1], -output => $handle;
+  $output =~ s/^.*\n//;
+  $output =~ s/\n$//;
+
+  return unindent $output;
+}
+
+BEGIN { _args([@ARGV]) }
+
+sub _args {
+  my $args
+    = Getopt::Long::Configure(qw(no_auto_abbrev no_ignore_case pass_through));
+  GetOptionsFromArray shift,
+    'h|help'   => \$ENV{ANSIBLE_HELP},
+    'a|args=s'   => \$ENV{ANSIBLE_ARGS},
+    'm|module_path=s' => \$ENV{ANSIBLE_MODULE};
+    'c|check' => \$ENV{ANSIBLE_CHECK_MODE};
+  Getopt::Long::Configure($args);
+}
+
+exit print extract_usage() if $ENV{ANSIBLE_HELP};
+
+use Test::AnsibleModule;
+
+my $t=Test::AnsibleModule->new();
+
+
+
+
+=encoding utf8
+
+=head1 NAME
+
+test_ansible_module - Test ansible modules on the command line
+
+=head1 SYNOPSIS
+
+  Usage: test_ansible_module -m module_path  -a arguments
+
+    test_ansible_module -m echo -a hello=world
+
+  Options:
+    -h,                         Show this help text
+    -m, --module_path <path>    Full path to module to run
+    -a --args <args>            Arguments to pass to module
+    -v, --check                 Run module in check mode
+
+=head1 SEE ALSO
+
+L<AnsibleModule>
+
+=cut
+

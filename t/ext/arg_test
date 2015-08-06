@@ -2,7 +2,6 @@
 
 use strict; use warnings;
 
-
 use lib 'lib';
 use AnsibleModule;
 
@@ -11,3 +10,9 @@ my $params=$module->params;
 $params->{msg}='arg_test';
 
 $module->exit_json($params);
+
+=head1
+
+#<<INCLUDE_ANSIBLE_MODULE_COMMON>>
+
+=cut

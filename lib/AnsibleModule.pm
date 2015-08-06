@@ -287,6 +287,8 @@ that ships with the ansible distribution.
 
 =head2 argument_spec
 
+Argument specification. Takes a hashref of arguments, along with a set of parameters for each.
+
 The argument specification for your module.
 
 =head2 bypass_checks
@@ -299,7 +301,7 @@ The argument specification for your module.
 
 =head2 required_together
 
-=head2 required_one_fo
+=head2 required_one_of
 
 =head2 add_file_common_args
 
