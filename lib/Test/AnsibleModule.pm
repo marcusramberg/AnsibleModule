@@ -4,6 +4,8 @@ use Mojo::Base -base;
 use Test::More;
 use Mojo::JSON qw/decode_json encode_json/;
 use Carp qw/croak/;
+use Data::Dumper qw/Dumper/;
+$Data::Dumper::Sortkeys++;
 
 has 'last_response';
 has 'success';
@@ -12,6 +14,12 @@ sub fail_ok {
   my $self = shift;
   my $rc   = $self->exec_module(@_);
   $self->_test('ok', $rc, 'Returned non-zero return code');
+}
+
+sub is_response {
+  my $self = shift;
+  my $res  = shift;
+  $self->_test('is', Dumper($self->last_response), Dumper($res), @_);
 }
 
 sub run_ok {
@@ -78,11 +86,15 @@ The deserialized response from the last module run.
 
 Test that the job runs, and returns a 0 error code (succeeds).
 
-=head fail_ok <module> [<args>]
+=head2 fail_ok <module> [<args>]
 
 Test that the jobs runs, and returns a non-zero error code (fails).
 
-=head exec_module <module> [<args>]
+=head2 is_response <hash res>, [<args>]
+
+Compare the last response to the provided struct.
+
+=head2 exec_module <module> [<args>]
 
 Run a module, return it's exit code
 
