@@ -2,6 +2,13 @@ package AnsibleModule;
 
 use Mojo::Base -base;
 
+=for comment
+
+We want JSON
+WANT_JSON
+
+=cut
+
 use Mojo::JSON qw/decode_json encode_json/;
 use Mojo::Util qw/slurp/;
 use POSIX qw/locale_h/;
@@ -22,26 +29,21 @@ has aliases                 => sub { {} };
 
 has params => sub {
   my $self = shift;
-  my $args = join(" ", @ARGV);
-  if ($args =~ s/^\@//) {
-    return decode_json(slurp($args));
+  return {} unless @ARGV;
+  my $args = slurp($ARGV[0]);
+  my $json = decode_json($args);
+  return $json if defined $json;
+  my $params = {};
+  for my $arg (split $args) {
+    my ($k, $v) = split '=', $arg;
+    $self->fail_json(
+      {msg => 'This module requires key=value style argument: ' . $arg})
+      unless defined $v;
+    $self->fail_json({msg => "Duplicate parameter: $k"})
+      if exists $params->{$k};
+    $params->{$k} = $v;
   }
-  elsif ($args =~ /^\{/) {
-    return decode_json($args);
-  }
-  else {
-    my $params = {};
-    for my $arg (@ARGV) {
-      my ($k, $v) = split '=', $arg;
-      $self->fail_json(
-        {msg => 'This module requires key=value style argument: ' . $arg})
-        unless defined $v;
-      $self->fail_json({msg => "Duplicate parameter: $k"})
-        if exists $params->{$k};
-      $params->{$k} = $v;
-    }
-    return $params;
-  }
+  return $params;
 };
 
 has _legal_inputs => sub {

@@ -3,6 +3,7 @@ package Test::AnsibleModule;
 use Mojo::Base -base;
 use Test::More;
 use Mojo::JSON qw/decode_json encode_json/;
+use Mojo::Asset::File;
 use Carp qw/croak/;
 use Data::Dumper qw/Dumper/;
 $Data::Dumper::Sortkeys++;
@@ -33,11 +34,12 @@ sub exec_module {
   my $self   = shift;
   my $module = shift;
   my $args   = ref $_[0] ? $_[0] : {@_};
-  my (@mapped_args) = map { $_ . '=' . $args->{$_} } keys %$args;
 
+  my $file = Mojo::Asset::File->new;
+  $file->add_chunk(encode_json($args));
   my $p;
 
-  open($p, "-|", join(" ", $module, @mapped_args))
+  open($p, "-|", join(" ", $module, $file->path))
     // croak "Could not run module: $!";
   my $response = "";
 

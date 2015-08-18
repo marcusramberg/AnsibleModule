@@ -6,7 +6,7 @@ use strict; use warnings;
 use lib 'lib';
 use AnsibleModule;
 
-my $module=AnsibleModule->new(argument_spec=>{hello => {}});
+my $module=AnsibleModule->new(check_invalid_arguments=>0,argument_spec=>{hello => {}});
 my $params=$module->params;
 $params->{msg}='echo';
 
