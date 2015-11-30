@@ -2,7 +2,7 @@ package AnsibleModule;
 
 use Mojo::Base -base;
 
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 
 =for comment
 
