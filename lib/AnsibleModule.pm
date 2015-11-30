@@ -268,17 +268,17 @@ AnsibleModule - Port of AnsibleModule helper from Ansible distribution
 
 =head1 SYNOPSIS
 
-my $pkg_mod=AnsibleModule->new(argument_spec=> {
-    name => { aliases => 'pkg' },
-    state => { default => 'present', choices => [ 'present', 'absent'],
-    list => {}
-  },
-  required_one_of => [ qw/ name list / ],
-  mutually_exclusive => [ qw/ name list / ],
-  supports_check_mode => 1,
-  );
-...
-$pkg_mod->exit_json(changed => 1, foo => 'bar');
+    my $pkg_mod=AnsibleModule->new(argument_spec=> {
+        name => { aliases => 'pkg' },
+        state => { default => 'present', choices => [ 'present', 'absent'],
+        list => {}
+      },
+      required_one_of => [ qw/ name list / ],
+      mutually_exclusive => [ qw/ name list / ],
+      supports_check_mode => 1,
+      );
+    ...
+    $pkg_mod->exit_json(changed => 1, foo => 'bar');
 
 =head1 DESCRIPTION
 
