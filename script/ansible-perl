@@ -5,6 +5,7 @@ use strict; use warnings;
 use Getopt::Long 'GetOptionsFromArray';
 use Pod::Usage 'pod2usage';
 use Data::Dumper;
+use Mojo::Util 'unindent';
 
 sub extract_usage {
   open my $handle, '>', \my $output;
@@ -15,20 +16,21 @@ sub extract_usage {
   return unindent $output;
 }
 
-BEGIN { _args([@ARGV]) }
-
+BEGIN {
 sub _args {
   my $args
     = Getopt::Long::Configure(qw(no_auto_abbrev no_ignore_case pass_through));
   GetOptionsFromArray shift,
     'h|help'   => \$ENV{ANSIBLE_HELP},
     'a|args=s'   => \$ENV{ANSIBLE_ARGS},
-    'm|module_path=s' => \$ENV{ANSIBLE_MODULE};
+    'm|module_path=s' => \$ENV{ANSIBLE_MODULE},
     'c|check' => \$ENV{ANSIBLE_CHECK_MODE};
   Getopt::Long::Configure($args);
 }
 
-exit print extract_usage() if $ENV{ANSIBLE_HELP};
+ _args([@ARGV]) };
+
+exit print extract_usage() if $ENV{ANSIBLE_HELP} || ! $ENV{ANSIBLE_MODULE};
 
 use Test::AnsibleModule;
 

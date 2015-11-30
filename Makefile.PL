@@ -9,5 +9,6 @@ WriteMakefile(
   PREREQ_PM    => {'Mojolicious' => '5.62'},
   AUTHOR       => 'Marcus Ramberg<mramberg@cpan.org>',
   LICENSE      => 'artistic_2',
-  test         => {TESTS => 't/*.t'}
+  test         => {TESTS => 't/*.t'},
+  EXE_FILES    => ['script/ansible-perl'],
 );

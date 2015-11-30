@@ -1,2 +1,6 @@
+0.2 2015-11-30
+  - make sure script is being installed.
+  - Fix CLI help
+
 0.1  2015-11-30
   - First release.
