@@ -2,6 +2,8 @@ package AnsibleModule;
 
 use Mojo::Base -base;
 
+our $VERSION = '0.1';
+
 =for comment
 
 We want JSON

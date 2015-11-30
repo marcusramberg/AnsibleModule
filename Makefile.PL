@@ -4,7 +4,10 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-  VERSION   => '0.01',
-  PREREQ_PM => {'Mojolicious' => '5.62'},
-  test      => {TESTS => 't/*.t'}
+  NAME         => 'AnsibleModule',
+  VERSION_FROM => 'lib/AnsibleModule.pm',
+  PREREQ_PM    => {'Mojolicious' => '5.62'},
+  AUTHOR       => 'Marcus Ramberg<mramberg@cpan.org>',
+  LICENSE      => 'artistic_2',
+  test         => {TESTS => 't/*.t'}
 );
