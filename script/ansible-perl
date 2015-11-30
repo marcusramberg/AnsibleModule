@@ -42,7 +42,7 @@ $ENV{ANSIBLE_ARGS} ||="{}";
 my $t=Test::AnsibleModule->new;
 my $res=$t->exec_module($ENV{ANSIBLE_MODULE},decode_json($ENV{ANSIBLE_ARGS}));
 
-print dumper($t->last_response)."\n";
+print "Output from $ENV{ANSIBLE_MODULE}: ". dumper($t->last_response);
 print "Response code: $res\n";
 
 =encoding utf8
