@@ -139,20 +139,23 @@ sub _check_arguments {
     if ($spec->{type}) {
       if ($spec->{type} eq 'dict') {
         $self->fail_json(msg => "Could not serialize $arg to dict")
-          unless defined($self->params->{$arg}
-            = $self->_to_dict($self->params->{$arg}));
+          unless defined(
+              $self->params->{$arg} = $self->_to_dict($self->params->{$arg})
+          );
 
       }
       elsif ($spec->{type} eq 'list') {
         $self->fail_json(msg => "Could not serialize $arg to list")
-          unless defined($self->params->{$arg}
-            = $self->_to_list($self->params->{$arg}));
+          unless defined(
+              $self->params->{$arg} = $self->_to_list($self->params->{$arg})
+          );
 
       }
       elsif ($spec->{type} eq 'bool') {
         $self->fail_json(msg => "Could not serialize $arg to bool")
-          unless defined($self->params->{$arg}
-            = $self->_to_list($self->params->{$arg}));
+          unless defined(
+              $self->params->{$arg} = $self->_to_list($self->params->{$arg})
+          );
       }
       else {
         $self->fail_json(msg => "Could not serialize $arg to bool")
@@ -181,7 +184,8 @@ sub _to_dict {
     return $res if defined $res;
   }
   elsif ($val =~ /=/) {
-    return {split /\s*=\s*/, split /\s*,\s*/, $val};
+    my @lines = split(/\s*,\s*/, $val);
+    return {map split(/\s*=\s*/), @lines};
   }
   return;
 }

@@ -34,9 +34,6 @@ use Test::AnsibleModule;
 
 my $t=Test::AnsibleModule->new();
 
-
-
-
 =encoding utf8
 
 =head1 NAME
