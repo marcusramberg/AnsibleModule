@@ -2,7 +2,7 @@ package AnsibleModule;
 
 use Mojo::Base -base;
 
-our $VERSION = '0.3';
+our $VERSION = '0.4';
 
 =for comment
 
@@ -12,7 +12,7 @@ WANT_JSON
 =cut
 
 use Mojo::JSON qw/decode_json encode_json/;
-use Mojo::Util qw/slurp/;
+use Mojo::File qw/path/;
 use POSIX qw/locale_h/;
 use Carp qw/croak/;
 
@@ -32,7 +32,7 @@ has aliases                 => sub { {} };
 has params => sub {
   my $self = shift;
   return {} unless @ARGV;
-  my $args = slurp($ARGV[0]);
+  my $args = path($ARGV[0])->slurp;
   my $json = decode_json($args);
   return $json if defined $json;
   my $params = {};
