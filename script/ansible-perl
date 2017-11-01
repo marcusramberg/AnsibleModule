@@ -5,7 +5,7 @@ use strict; use warnings;
 our $VERSION='0.3';
 
 use Getopt::Long 'GetOptionsFromArray';
-use Mojo::Util qw/dumper spurt/;
+use Mojo::Util qw/dumper/;
 use Mojolicious::Command '';
 use Mojo::JSON qw/decode_json/;
 use Test::AnsibleModule;
@@ -39,7 +39,7 @@ if($ENV{ANSIBLE_PACK}) {
 
   my $code=$fp->fatpack_file($ENV{ANSIBLE_MODULE});
   $ENV{ANSIBLE_MODULE}=$ENV{ANSIBLE_MODULE}.'.packed';
-  spurt $code, $ENV{ANSIBLE_MODULE};
+  Mojo::File->new($ENV{ANSIBLE_MODULE})->spurt($code);
   chmod 0755, $ENV{ANSIBLE_MODULE};
   print "Wrote $ENV{ANSIBLE_MODULE}\n";
   exit 0;
