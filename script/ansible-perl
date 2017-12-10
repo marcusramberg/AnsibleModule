@@ -58,13 +58,13 @@ print "Response code: $res\n";
 
 =head1 NAME
 
-test_ansible_module - Test ansible modules on the command line
+ansible-perl - Test ansible modules on the command line
 
 =head1 SYNOPSIS
 
-  Usage: test_ansible_module -m module_path  -a arguments
+  Usage: ansible-perl -m module_path  -a arguments
 
-    test_ansible_module -m echo -a hello=world
+    ansible-perl-m echo -a hello=world
 
   Options:
     -h,                         Show this help text
