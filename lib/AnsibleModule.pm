@@ -141,27 +141,24 @@ sub _check_arguments {
     if ($spec->{type}) {
       if ($spec->{type} eq 'dict') {
         $self->fail_json(msg => "Could not serialize $arg to dict")
-          unless defined(
-              $self->params->{$arg} = $self->_to_dict($self->params->{$arg})
-          );
+          unless defined($self->params->{$arg}
+            = $self->_to_dict($self->params->{$arg}));
 
       }
       elsif ($spec->{type} eq 'list') {
         $self->fail_json(msg => "Could not serialize $arg to list")
-          unless defined(
-              $self->params->{$arg} = $self->_to_list($self->params->{$arg})
-          );
+          unless defined($self->params->{$arg}
+            = $self->_to_list($self->params->{$arg}));
 
       }
       elsif ($spec->{type} eq 'bool') {
         $self->fail_json(msg => "Could not serialize $arg to bool")
-          unless defined(
-              $self->params->{$arg} = $self->_to_list($self->params->{$arg})
-          );
+          unless defined($self->params->{$arg}
+            = $self->_to_list($self->params->{$arg}));
       }
       else {
         $self->fail_json(msg => "Could not serialize $arg to bool")
-          if ref $self->params->{$arg}
+          if ref $self->params->{$arg};
 
       }
     }
@@ -288,7 +285,7 @@ AnsibleModule - Port of AnsibleModule helper from Ansible distribution
 
 =head1 DESCRIPTION
 
-This is a helper class for building ansible modules in Perl. It's a straight port of the AnsibleModule class
+This is a helper class for building Ansible modules in Perl. It's a straight port of the AnsibleModule class
 that ships with the ansible distribution.
 
 =head1 ATTRIBUTES
