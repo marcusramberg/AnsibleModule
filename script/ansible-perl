@@ -1,12 +1,13 @@
 #!/usr/bin/env perl
 
-use strict; use warnings;
+use strict;
+use warnings;
 
-our $VERSION='0.3';
+our $VERSION = '0.3';
 
 use Getopt::Long 'GetOptionsFromArray';
 use Mojo::Util qw/dumper/;
-use Mojolicious::Command '';
+use Mojolicious::Command;
 use Mojo::JSON qw/decode_json/;
 use Test::AnsibleModule;
 use App::FatPacker;
@@ -14,10 +15,10 @@ use Cwd qw(cwd);
 use File::Spec::Functions qw(catdir);
 
 sub _args {
-  my $args
-    = Getopt::Long::Configure(qw/no_auto_abbrev no_ignore_case pass_through auto_version auto_help/);
+  my $args = Getopt::Long::Configure(
+    qw/no_auto_abbrev no_ignore_case pass_through auto_version auto_help/);
   GetOptionsFromArray shift,
-    'h|help'          => \$ENV{ANSIBLE_HELP},   
+    'h|help'          => \$ENV{ANSIBLE_HELP},
     'a|args=s'        => \$ENV{ANSIBLE_ARGS},
     'p|pack'          => \$ENV{ANSIBLE_PACK},
     'm|module_path=s' => \$ENV{ANSIBLE_MODULE},
@@ -25,33 +26,35 @@ sub _args {
   Getopt::Long::Configure($args);
 }
 
-BEGIN { _args([@ARGV]) };
+BEGIN { _args([@ARGV]) }
 
-exit print Mojolicious::Command->extract_usage() if $ENV{ANSIBLE_HELP} || ! $ENV{ANSIBLE_MODULE};
+exit print Mojolicious::Command->extract_usage()
+  if $ENV{ANSIBLE_HELP} || !$ENV{ANSIBLE_MODULE};
 
-if($ENV{ANSIBLE_PACK}) {
-  my $fp=App::FatPacker->new;
+if ($ENV{ANSIBLE_PACK}) {
+  my $fp      = App::FatPacker->new;
   my @modules = split /\r?\n/, $fp->trace(args => [$ENV{ANSIBLE_MODULE}]);
-  push @modules,'AnsibleModule.pm';
+  push @modules, 'AnsibleModule.pm';
   my @packlists = $fp->packlists_containing(\@modules);
-  my $base = catdir(cwd, 'fatlib');
+  my $base      = catdir(cwd, 'fatlib');
   $fp->packlists_to_tree($base, \@packlists);
 
-  my $code=$fp->fatpack_file($ENV{ANSIBLE_MODULE});
-  $ENV{ANSIBLE_MODULE}=$ENV{ANSIBLE_MODULE}.'.packed';
+  my $code = $fp->fatpack_file($ENV{ANSIBLE_MODULE});
+  $ENV{ANSIBLE_MODULE} = $ENV{ANSIBLE_MODULE} . '.packed';
   Mojo::File->new($ENV{ANSIBLE_MODULE})->spurt($code);
   chmod 0755, $ENV{ANSIBLE_MODULE};
   print "Wrote $ENV{ANSIBLE_MODULE}\n";
   exit 0;
 }
 
-$ENV{ANSIBLE_ARGS} ||="{}";
+$ENV{ANSIBLE_ARGS} ||= "{}";
 
 
-my $t=Test::AnsibleModule->new;
-my $res=$t->exec_module($ENV{ANSIBLE_MODULE},decode_json($ENV{ANSIBLE_ARGS}));
+my $t = Test::AnsibleModule->new;
+my $res
+  = $t->exec_module($ENV{ANSIBLE_MODULE}, decode_json($ENV{ANSIBLE_ARGS}));
 
-print "Output from $ENV{ANSIBLE_MODULE}: ". dumper($t->last_response);
+print "Output from $ENV{ANSIBLE_MODULE}: " . dumper($t->last_response);
 print "Response code: $res\n";
 
 =encoding utf8
@@ -64,7 +67,7 @@ ansible-perl - Test ansible modules on the command line
 
   Usage: ansible-perl -m module_path  -a arguments
 
-    ansible-perl-m echo -a hello=world
+    ansible-perl -m echo -a "{"hello": "world"}
 
   Options:
     -h,                         Show this help text

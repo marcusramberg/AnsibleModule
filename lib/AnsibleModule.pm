@@ -324,4 +324,8 @@ Exit with a json msg. changed will default to false.
 
 Exit with a failure. msg is required.
 
+=head1 COPYRIGHT
+
+=head1 LICENSE
+
 =cut
